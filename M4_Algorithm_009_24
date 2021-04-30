@@ -1,0 +1,114 @@
+function [vNaughts, vMax, kM] = M4_Algorithm_009_24(all_data)
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ % ENGR 132 
+ % Program Description
+ % This program will read a large data set of test data for different
+ % concentrations and calculate the initial velocity for each concentration.
+ %
+ % Function Call
+ % [vNaughts, vMax, kM] = M4_Algorithm_009_24(all_data);
+ %
+ % Input Arguments
+ % 1. all_data - Data from given file, loaded into MATLAB.
+ %
+ % Output Arguments
+ % 1. vNaughts - 10 value array containing the vNaught values for all
+ % concentrations (uM/s)
+ % 2. vMax - Single value that summarizes the enzyme (uM/s)
+ % 3. kM - Single value that summarizes the enzyme (uM)
+ %
+ % Assignment Information
+ %   Assignment:     M4, Problem 1
+ %   Team members:   Sofia Loucks, louckss@purdue.edu
+ %                   Allison Womer, awomer@purdue.edu
+ %                   Einar Pederson, ecpeders@purdue.edu
+ %                   Katherine Sarafin, ksarafin@purdue.edu
+ %   Team ID:        009-24
+ %   Academic Integrity:
+ %     [] We worked with one or more peers but our collaboration
+ %        maintained academic integrity.
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ %% ____________________
+ %% INITIALIZATION
+ 
+ vNaughts = zeros(1,10); % Create empty matrix for all 10 vnaught values.
+ start = 2; % First column with test data.
+ slopes = zeros(1,50); % Create empty matrix for 50 slopes to average.
+
+ % Assign data from file to usable variables.
+ time = all_data(5:end,1);
+ concentration = [3.75, 7.5, 15, 30, 65, 125, 250, 500, 1000, 2000];
+ vMax = 0;
+ kM = 0;
+ 
+ %% ____________________
+ %% CALCULATIONS
+
+    % Loop through each test concentration.
+    for j = 1:1:10
+    
+        % Separate desired test concentration from full matrix.
+        % original_data = all_data((9:end), start);
+        
+        % The M3 algorithm called the data incorrectly and started
+        % calculations several rows past the start of the data. In our M4
+        % algorithm we have fixed this problem and the results are more
+        % accurate.
+        original_data = all_data((5:end), start);
+        
+        % Smooth the data before processing.
+        original_smooth = smooth(original_data(:));
+    
+        % Find the slopes of the first 50 sets of points for each test and average them
+        for s = 1:1:50
+        
+            slope_original = (original_smooth(s+1) - original_smooth(s))/(time(s+1) - time(s));
+    
+            slopes(s) = (slope_original);
+        
+        end
+    
+        % Assign to values vector.
+        vNaughts(j) = (mean(slopes));
+    
+        start = start + 1;
+        
+    end
+    
+ % Adjust values for eadie hofstee plot.
+ xAxis = vNaughts./concentration;
+ yAxis = vNaughts;
+  
+ % Create model.
+ coeffs = polyfit(xAxis, yAxis, 1);
+ m = coeffs(1);
+ b = coeffs(2);
+ vMax = b;
+ kM = -m;
+
+ %% ____________________
+ %% FORMATTED TEXT/FIGURE DISPLAYS
+
+% Display results to the command window.
+fprintf("Vnaught Values [uM/s]: ");
+fprintf("%.4f  ", vNaughts(:));
+fprintf("\n");
+fprintf("Vmax [uM/s]: %.2f\n", vMax);
+fprintf("Km [uM]: %.2f\n\n", kM);
+
+end
+
+ %% ____________________
+ %% RESULTS
+
+% Vnaught Values [uM/s]: 0.0247  0.0488  0.1015  0.1741  0.3269  0.5552  0.8456  1.1998  1.3951  1.5633  
+% Vmax [uM/s]: 1.76
+% Km [uM]: 263.78
+
+ %% ____________________
+ %% ACADEMIC INTEGRITY STATEMENT
+ % We have not used source code obtained from any other unauthorized
+ % source, either modified or unmodified. Neither have we provided
+ % access to my code to another. The program we are submitting
+ % is our own original work.
